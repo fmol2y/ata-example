@@ -1,19 +1,19 @@
 import { promises as fs } from "fs";
-import { config } from 'dotenv';
 
 import { AssetTransferApi, constructApiPromise, TxResult } from '@substrate/asset-transfer-api';
 import { Keyring } from '@polkadot/keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-// Init Dotenv
-config();
-
 const GREEN = '\u001b[32m';
 const PURPLE = '\u001b[35m';
 
-// Default values are set for Kusama
-const ws_url = process.env.WS_URL || 'wss://statemine-rpc.dwellir.com';
-const ss58Format = process.env.SS58 && parseInt(process.env.SS58) || 2;
+const ws_url = 'wss://statemine-rpc.dwellir.com';
+const ss58Format = 2;
+const destId = '2007'; // Shiden
+const destAddr = 'aSCLonoQ8zS3Ys59HwfDxbaN4xXhGMJwrnbhVUiByGZxUo9';
+const usdt = '1984';
+const usdtAmount = '50000';
+const paysWithFeeOrigin = '{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":1984}]}}';
 
 const createKeyPair = async () => {
     await cryptoWaitReady();
@@ -23,26 +23,25 @@ const createKeyPair = async () => {
             console.error(err);
             process.exit(1);
         });
-    // Kusama ss58 format is 2
     const keyring = new Keyring({ type: 'sr25519', ss58Format });
 	const keyPair = keyring.addFromUri(keyPhrase, { name: 'keyPair' });
     
     return keyPair;
 }
 
-const createSubmittable = async (assetApi: AssetTransferApi): Promise<TxResult<'payload'>> => {
+const createSubmittable = async (assetApi: AssetTransferApi, sendersAddr: string): Promise<TxResult<'payload'>> => {
 	let callInfo: TxResult<'payload'>;
 	try {
 		callInfo = await assetApi.createTransferTransaction(
-			'2007',
-			'aSCLonoQ8zS3Ys59HwfDxbaN4xXhGMJwrnbhVUiByGZxUo9',
-			['1984'],
-			['50000'],
+			destId, 					// Destination chain ID (0 if you want to send to a relay chain)
+			destAddr,  					// Destination Address
+			[usdt], 					// Asset to transfer
+			[usdtAmount], 				// Amount of the asset to transfer
 			{
-				format: 'payload',
-				xcmVersion: 3,
-				paysWithFeeOrigin: '{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":1984}]}}',
-				sendersAddr: 'HLEr3s7jYkuqwrAaBLRrdbi8T95rMjE1rDdHu93LQDPJfJM',
+				format: 'payload',		// Format type - payload is necessary for `paysWithFeeOrigin`
+				xcmVersion: 3,			// Xcm Version
+				paysWithFeeOrigin, 		// Mulitlocation of the asset to pay on chain
+				sendersAddr,			// Address of the sender of this tx.
 			},
 		);
 
@@ -58,8 +57,8 @@ const createSubmittable = async (assetApi: AssetTransferApi): Promise<TxResult<'
 const main = async () => {
 	const { api, specName, safeXcmVersion } = await constructApiPromise(ws_url);
 	const assetApi = new AssetTransferApi(api, specName, safeXcmVersion);
-	const txInfo = await createSubmittable(assetApi);
 	const keyPair = await createKeyPair();
+	const txInfo = await createSubmittable(assetApi, keyPair.address);
 	const { signature } = txInfo.tx.sign(keyPair);
 	const extrinsic = assetApi.api.registry.createType(
 		'Extrinsic',

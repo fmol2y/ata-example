@@ -10,7 +10,6 @@ config();
 
 const GREEN = '\u001b[32m';
 const PURPLE = '\u001b[35m';
-const EXTRINSIC_VERSION = 4;
 
 // Default values are set for Kusama
 const ws_url = process.env.WS_URL || 'wss://statemine-rpc.dwellir.com';
@@ -60,19 +59,18 @@ const createSubmittable = async (assetApi: AssetTransferApi): Promise<TxResult<'
 const main = async () => {
 	const { api, specName, safeXcmVersion } = await constructApiPromise(ws_url);
 	const assetApi = new AssetTransferApi(api, specName, safeXcmVersion);
-    const txInfo = await createSubmittable(assetApi);
-    const keyPair = await createKeyPair();
-	const payload = assetApi.api.createType('ExtrinsicPayload', txInfo.tx, {
-		version: EXTRINSIC_VERSION
-	});
+	const txInfo = await createSubmittable(assetApi);
+	const keyPair = await createKeyPair();
+	const { signature } = txInfo.tx.sign(keyPair);
 	const extrinsic = assetApi.api.registry.createType(
 		'Extrinsic',
-		{ method: payload.method },
+		{ method: txInfo.tx.method },
 		{ version: 4 }
 	);
-
-	const res = await assetApi.api.tx(extrinsic).signAndSend(keyPair);
-	console.log('Result: ', res);
+	
+	extrinsic.addSignature(keyPair.address, signature, txInfo.tx.toHex()); 
+	const res = await assetApi.api.tx(extrinsic).send();
+	console.log(res.toHex());
 };
 
 main()

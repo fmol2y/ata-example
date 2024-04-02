@@ -509,13 +509,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@substrate/asset-transfer-api@file:../asset-transfer-api::locator=assets-ts-test%40workspace%3A.":
-  version: 0.1.8
-  resolution: "@substrate/asset-transfer-api@file:../asset-transfer-api#../asset-transfer-api::hash=99d587&locator=assets-ts-test%40workspace%3A."
+"@substrate/asset-transfer-api@npm:0.2.0-beta.0":
+  version: 0.2.0-beta.0
+  resolution: "@substrate/asset-transfer-api@npm:0.2.0-beta.0"
   dependencies:
     "@polkadot/api": "npm:10.12.4"
     "@substrate/asset-transfer-api-registry": "npm:^0.2.15"
-  checksum: 10/c4f67f5274914f24154f278507bc53008c828a6b456b3661a653f022aa3da1ebb489a371f56c9c46ba9ab4a415ea0614d5101d69a4de560082b238d29a2aeca5
+  checksum: 10/e777f501bb2ca259b20c3cdba3895c4d97fa49799077ba979fe5693d528a8acff9b9003bd81d5c62024c06d2bc75e652eeb82e5ef4c071c8f3d7e957d3145d44
   languageName: node
   linkType: hard
 
@@ -591,7 +591,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "assets-ts-test@workspace:."
   dependencies:
-    "@substrate/asset-transfer-api": "file:../asset-transfer-api"
+    "@substrate/asset-transfer-api": "npm:0.2.0-beta.0"
     "@types/node": "npm:^20.12.2"
     dotenv: "npm:^16.4.5"
     typescript: "npm:^5.4.3"

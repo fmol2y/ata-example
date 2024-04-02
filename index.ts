@@ -40,7 +40,6 @@ const createSubmittable = async (assetApi: AssetTransferApi): Promise<TxResult<'
 			['50000'],
 			{
 				format: 'payload',
-				isLimited: true,
 				xcmVersion: 3,
 				paysWithFeeOrigin: '{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":1984}]}}',
 				sendersAddr: 'HLEr3s7jYkuqwrAaBLRrdbi8T95rMjE1rDdHu93LQDPJfJM',

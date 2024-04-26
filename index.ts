@@ -7,13 +7,23 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 const GREEN = '\u001b[32m';
 const PURPLE = '\u001b[35m';
 
-const ws_url = 'wss://statemine-rpc.dwellir.com';
-const ss58Format = 2;
-const destId = '2007'; // Shiden
-const destAddr = 'aSCLonoQ8zS3Ys59HwfDxbaN4xXhGMJwrnbhVUiByGZxUo9';
-const usdt = '1984';
-const usdtAmount = '50000';
-const paysWithFeeOrigin = '{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":1984}]}}';
+// Polkadot Asset Hub
+const ws_url = 'wss://polkadot-asset-hub-rpc.polkadot.io';
+// Polkadot
+const ss58Format = 0;
+// Asset ID to send
+const assetId = '111';
+// Amount to send
+const assetAmount = '1000000';
+// Asset to pay fees with
+const feeAssetId = '111';
+// Conversion of feeAssetId to the Location for the SignedExtension
+const paysWithFeeOrigin =
+	`{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":${feeAssetId}}]}}`;
+// ParaId for where to send the asset
+const destId = '1000';
+// Address to which to send the asset
+const destAddr = '14kjCMayPMV8xzCtyVN1zM7EZp6HbuAkmiU8KyvWempvmYAh';
 
 const createKeyPair = async () => {
     await cryptoWaitReady();
@@ -35,8 +45,8 @@ const createSubmittable = async (assetApi: AssetTransferApi, sendersAddr: string
 		callInfo = await assetApi.createTransferTransaction(
 			destId, 					// Destination chain ID (0 if you want to send to a relay chain)
 			destAddr,  					// Destination Address
-			[usdt], 					// Asset to transfer
-			[usdtAmount], 				// Amount of the asset to transfer
+			[assetId], 					// Asset to transfer
+			[assetAmount], 				// Amount of the asset to transfer
 			{
 				format: 'payload',		// Format type - payload is necessary for `paysWithFeeOrigin`
 				xcmVersion: 3,			// Xcm Version
@@ -66,7 +76,7 @@ const main = async () => {
 		{ version: 4 }
 	);
 	
-	extrinsic.addSignature(keyPair.address, signature, txInfo.tx.toHex()); 
+	extrinsic.addSignature(keyPair.address, signature, txInfo.tx.toHex());
 	const res = await assetApi.api.tx(extrinsic).send();
 	console.log(res.toHex());
 };

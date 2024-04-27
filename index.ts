@@ -8,34 +8,30 @@ const GREEN = '\u001b[32m';
 const PURPLE = '\u001b[35m';
 
 // Polkadot Asset Hub
-const ws_url = 'wss://polkadot-asset-hub-rpc.polkadot.io';
+const ws_url = 'wss://statemint-rpc-tn.dwellir.com';
 // Polkadot
 const ss58Format = 0;
-// Asset ID to send
-const assetId = '111';
+// Asset ID to send (23=PINK, 30=DED, 1984=USDT, 1337=USDC)
+const assetId = '30';
 // Amount to send
-const assetAmount = '1000000';
+const assetAmount = '29000000000';
 // Asset to pay fees with
-const feeAssetId = '111';
+const feeAssetId = '30';
 // Conversion of feeAssetId to the Location for the SignedExtension
 const paysWithFeeOrigin =
 	`{"parents":0,"interior":{"X2":[{"palletInstance":50},{"generalIndex":${feeAssetId}}]}}`;
 // ParaId for where to send the asset
 const destId = '1000';
 // Address to which to send the asset
-const destAddr = '14kjCMayPMV8xzCtyVN1zM7EZp6HbuAkmiU8KyvWempvmYAh';
+const destAddr = '121Rs6fKm8nguHnvPfG1Cq3ctFuNAVZGRmghwkJwHpKxKjbx';
 
 const createKeyPair = async () => {
     await cryptoWaitReady();
 
-    const keyPhrase = await fs.readFile('keyphrase.txt', 'utf-8')
-        .catch((err) => {
-            console.error(err);
-            process.exit(1);
-        });
+    const mnemonic = ""; // 
     const keyring = new Keyring({ type: 'sr25519', ss58Format });
-	const keyPair = keyring.addFromUri(keyPhrase, { name: 'keyPair' });
-    
+    const keyPair = keyring.createFromUri(mnemonic, { name: 'sr25519' });
+	
     return keyPair;
 }
 
@@ -55,7 +51,7 @@ const createSubmittable = async (assetApi: AssetTransferApi, sendersAddr: string
 			},
 		);
 
-		console.log(`${PURPLE}The following call data that is returned:\n${GREEN}${JSON.stringify(callInfo, null, 4)}`);
+		console.log(`${PURPLE}The following call data that is returned:\n${JSON.stringify(callInfo, null, 4)}`);
 	} catch (e) {
 		console.error(e);
 		throw Error(e as string);
@@ -77,8 +73,14 @@ const main = async () => {
 	);
 	
 	extrinsic.addSignature(keyPair.address, signature, txInfo.tx.toHex());
-	const res = await assetApi.api.tx(extrinsic).send();
-	console.log(res.toHex());
+	const extrinsic0 = await assetApi.api.tx(extrinsic);
+
+    try {
+        let x = await extrinsic0.send();
+	console.log(extrinsic0, x.toHex(), x.toJSON());
+    } catch (error) {
+        console.error('Error submitting extrinsic:', error);
+    }
 };
 
 main()
